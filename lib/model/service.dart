@@ -1,4 +1,6 @@
 class ServiceModel {
+  final int id;
+  final int groupId;
   final String serviceTitle;
   final String serviceSubTitle;
   final String serviceAsset;
@@ -7,5 +9,12 @@ class ServiceModel {
 
   String get serviceCost => '\$' + serviceCharge.toStringAsFixed(2);
 
-  ServiceModel({this.serviceTitle, this.serviceSubTitle, this.serviceAsset, this.serviceCharge, this.items});
+  ServiceModel(
+      {this.id,
+      this.groupId,
+      this.serviceTitle,
+      this.serviceSubTitle,
+      this.serviceAsset,
+      this.serviceCharge,
+      this.items});
 }

@@ -6,9 +6,10 @@ import 'package:pigment/pigment.dart';
 import 'package:provider/provider.dart';
 import 'package:service_appointment/cart_page.dart';
 import 'package:service_appointment/ensure_visibility.dart';
+import 'package:service_appointment/feedback_page.dart';
+import 'package:service_appointment/provider/booking_provider.dart';
+import 'package:service_appointment/utils/animation_transition.dart';
 import 'package:vibrate/vibrate.dart';
-import 'provider/booking_provider.dart';
-import 'utils/animation_transition.dart';
 
 class FifthPage extends StatefulWidget {
   @override
@@ -21,13 +22,13 @@ class _FifthPageState extends State<FifthPage>
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
   var duration = Duration(milliseconds: 1000);
-  bool showCartView = false;
   AnimationController _animationController;
   bool isFirstTime = true;
   TextEditingController commentController = TextEditingController();
   FocusNode focusNode = FocusNode();
   bool isSubmitted = false;
   bool canPop = true;
+  AppBar appBar;
 
   @override
   void initState() {
@@ -43,6 +44,9 @@ class _FifthPageState extends State<FifthPage>
     });
     _animationController.forward();
     focusNode.addListener(() => setState(() {}));
+    commentController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -169,22 +173,13 @@ class _FifthPageState extends State<FifthPage>
     Size size = media.size;
     BookingProvider booking = Provider.of<BookingProvider>(context);
 
-    AppBar appBar = AppBar(
+    appBar = AppBar(
         backgroundColor: theme.primaryColor,
         leading: IconButton(
             icon: Icon(FeatherIcons.chevronLeft), onPressed: onBackPressed),
-        title: showCartView
-            ? Text("Service Cart",
-                style: TextStyle(
-                  color: Color(0xfffafafa),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  fontStyle: FontStyle.normal,
-                  letterSpacing: -0.009999999776482582,
-                ))
-            : Text('Appointment Summary',
-                style: textTheme.subhead.copyWith(
-                    color: Colors.white, fontWeight: FontWeight.w600)),
+        title: Text('Appointment Summary',
+            style: textTheme.subhead
+                .copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
         centerTitle: true,
         actions: <Widget>[
           IconButton(
@@ -280,70 +275,75 @@ class _FifthPageState extends State<FifthPage>
                                           border: Border.all(
                                               color: Color(0xffd7dce4),
                                               width: 1))),
-                                  Container(
-                                    width: 100,
-                                    child: Column(
-                                      children: <Widget>[
-                                        Stack(
-                                          children: <Widget>[
-                                            IconButton(
-                                              onPressed: showCartView
-                                                  ? null
-                                                  : () {
-                                                      setState(() {
-                                                        showCartView = true;
-                                                      });
-                                                    },
-                                              icon: Icon(
-                                                FeatherIcons.shoppingBag,
-                                                color: theme.primaryColor,
-                                                size: 30,
-                                              ),
-                                            ),
-                                            if (booking.addedServiceList !=
-                                                    null &&
-                                                booking.addedServiceList
-                                                        .length >
-                                                    0)
-                                              Positioned(
-                                                top: 0,
-                                                right: 5,
-                                                child: Material(
-                                                  color: theme.accentColor,
-                                                  type: MaterialType.circle,
-                                                  child: Padding(
-                                                    padding:
-                                                        EdgeInsets.all(6.0),
-                                                    child: Text(
-                                                        booking.cartCount,
-                                                        style: TextStyle(
-                                                          color:
-                                                              Color(0xff3a405a),
-                                                          fontSize: 10,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          fontStyle:
-                                                              FontStyle.normal,
-                                                          letterSpacing: 0,
-                                                        )),
-                                                  ),
+                                  InkWell(
+                                    onTap: () => showCartView(booking),
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Container(
+                                      width: 100,
+                                      child: Column(
+                                        children: <Widget>[
+                                          Stack(
+                                            children: <Widget>[
+                                              IconButton(
+                                                onPressed: null,
+                                                icon: Icon(
+                                                  FeatherIcons.shoppingBag,
+                                                  color: theme.primaryColor,
+                                                  size: 30,
                                                 ),
-                                              )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Text("Added\nServices",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Color(0xff3a405a),
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                              fontStyle: FontStyle.normal,
-                                              letterSpacing: 0,
-                                            ))
-                                      ],
+                                              ),
+                                              if (booking.addedServiceList !=
+                                                      null &&
+                                                  booking.addedServiceList
+                                                          .length >
+                                                      0)
+                                                Positioned(
+                                                  top: 0,
+                                                  right: 5,
+                                                  child: Material(
+                                                    color: theme.accentColor,
+                                                    type: MaterialType.circle,
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsets.all(6.0),
+                                                      child: Text(
+                                                          booking.cartCount,
+                                                          style: TextStyle(
+                                                            color: Color(
+                                                                0xff3a405a),
+                                                            fontSize: 10,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            fontStyle: FontStyle
+                                                                .normal,
+                                                            letterSpacing: 0,
+                                                          )),
+                                                    ),
+                                                  ),
+                                                )
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                          Text(
+                                              (booking.addedServiceList !=
+                                                          null &&
+                                                      booking.addedServiceList
+                                                              .length >
+                                                          0)
+                                                  ? "Added\nServices"
+                                                  : "No\nServices\nAdded",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Color(0xff3a405a),
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                                fontStyle: FontStyle.normal,
+                                                letterSpacing: 0,
+                                              ))
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -366,7 +366,8 @@ class _FifthPageState extends State<FifthPage>
                                         borderRadius: BorderRadius.circular(8),
                                         color: Colors.white,
                                       ),
-                                      padding: EdgeInsets.symmetric(vertical: 3, horizontal: 1),
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 3, horizontal: 1),
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -377,6 +378,7 @@ class _FifthPageState extends State<FifthPage>
                                               DateFormat("EEEE")
                                                   .format(booking.selectedDate),
                                               maxLines: 1,
+                                              softWrap: true,
                                               style: textTheme.caption.copyWith(
                                                   fontSize: 6,
                                                   color: theme.errorColor),
@@ -386,7 +388,6 @@ class _FifthPageState extends State<FifthPage>
                                             DateFormat("dd")
                                                 .format(booking.selectedDate),
                                             style: textTheme.title.copyWith(
-                                                fontSize: 16,
                                                 color: theme.disabledColor),
                                           )
                                         ],
@@ -565,7 +566,9 @@ class _FifthPageState extends State<FifthPage>
                                                             InputBorder.none),
                                                   ),
                                                 ),
-                                                if (isSubmitted && commentController.text.isNotEmpty)
+                                                if (isSubmitted &&
+                                                    commentController
+                                                        .text.isNotEmpty)
                                                   Padding(
                                                     padding:
                                                         EdgeInsets.symmetric(
@@ -601,160 +604,53 @@ class _FifthPageState extends State<FifthPage>
                     ),
                   ),
                 ),
-                if (showCartView)
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        showCartView = false;
-                      });
-                    },
-                    child: Container(
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    height: 90,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: new BoxDecoration(
                       color: Color(0xff2f313b),
-                      alignment: Alignment.bottomCenter,
-                      child: DraggableScrollableSheet(
-                          initialChildSize: 1,
-                          minChildSize: 0.5,
-                          maxChildSize: 1,
-                          builder: (context, controller) {
-                            return CartPage(
-                              scrollController: controller,
-                              onClosed: () {
-                                setState(() {
-                                  showCartView = false;
-                                });
-                              },
-                            );
-                          }),
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(20),
+                          topLeft: Radius.circular(20)),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Color(0x51000000),
+                            offset: Offset(0, 8),
+                            blurRadius: 16,
+                            spreadRadius: 0),
+                        BoxShadow(
+                            color: Color(0x0a000000),
+                            offset: Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0)
+                      ],
                     ),
-                  ),
-                if (showCartView)
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      height: 70 + media.padding.bottom / 2,
-                      padding: EdgeInsets.only(
-                          right: 20,
-                          left: 10,
-                          bottom: media.padding.bottom / 2),
-                      decoration: new BoxDecoration(
-                        color: theme.primaryColor,
-                        borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(20),
-                            topLeft: Radius.circular(20)),
-                        boxShadow: [
-                          if (!showCartView) ...{
-                            BoxShadow(
-                                color: Color(0x51000000),
-                                offset: Offset(0, 8),
-                                blurRadius: 16,
-                                spreadRadius: 0),
-                            BoxShadow(
-                                color: Color(0x0a000000),
-                                offset: Offset(0, 2),
-                                blurRadius: 4,
-                                spreadRadius: 0)
-                          }
-                        ],
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Row(
-                              children: <Widget>[
-                                IconButton(
-                                  onPressed: null,
-                                  icon: Icon(
-                                    FeatherIcons.shoppingBag,
-                                    color: theme.accentColor,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 10),
-                                  child: Text(
-                                      "${(booking.addedServiceList == null || int.parse(booking.cartCount) == 0) ? "No" : booking.cartCount} services added",
-                                      style: TextStyle(
-                                        color: Color(0xffffffff),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        fontStyle: FontStyle.normal,
-                                        letterSpacing: 0,
-                                      )),
-                                ),
-                                Container(
-                                    width: 42,
-                                    height: 42,
-                                    padding: EdgeInsets.all(10),
-                                    margin:
-                                        EdgeInsets.symmetric(horizontal: 10),
-                                    child: Image.asset(
-                                      'assets/icons/arrow_right.png',
-                                      color: theme.accentColor,
-                                    )),
-                                Expanded(
-                                  child: Text(booking.cartTotal,
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        color: Color(0xfffafafa),
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        fontStyle: FontStyle.normal,
-                                        letterSpacing: -0.01666666629413763,
-                                      )),
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                if (!showCartView)
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      height: 90,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      decoration: new BoxDecoration(
-                        color: Color(0xff2f313b),
-                        borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(20),
-                            topLeft: Radius.circular(20)),
-                        boxShadow: [
-                          if (!showCartView) ...{
-                            BoxShadow(
-                                color: Color(0x51000000),
-                                offset: Offset(0, 8),
-                                blurRadius: 16,
-                                spreadRadius: 0),
-                            BoxShadow(
-                                color: Color(0x0a000000),
-                                offset: Offset(0, 2),
-                                blurRadius: 4,
-                                spreadRadius: 0)
-                          }
-                        ],
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Text("How was your booking experience?",
-                                style: TextStyle(
-                                  color: Color(0xffffffff),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  letterSpacing: 0,
-                                )),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text("How was your booking experience?",
+                              style: TextStyle(
+                                color: Color(0xffffffff),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.normal,
+                                letterSpacing: 0,
+                              )),
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        if (focusNode.hasFocus)
                           Material(
-                            color: Color(0xff00e1c2),
+                            color: commentController.text.isEmpty
+                                ? theme.disabledColor
+                                : Color(0xff00e1c2),
                             borderRadius: BorderRadius.circular(32),
                             child: InkWell(
                               onTap: () {
-                                if (!isSubmitted) {
+                                if (commentController.text.isNotEmpty) {
                                   if (booking.canVibrate)
                                     Vibrate.feedback(FeedbackType.light);
                                   setState(() {
@@ -768,10 +664,31 @@ class _FifthPageState extends State<FifthPage>
                                 height: 45,
                                 width: 170,
                                 alignment: Alignment.center,
-                                child: Text(
-                                    focusNode.hasFocus
-                                        ? "Submit"
-                                        : "Give Feedback",
+                                child: Text("Submit",
+                                    style: TextStyle(
+                                      color: commentController.text.isEmpty
+                                          ? Colors.white
+                                          : Color(0xff3a405a),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      fontStyle: FontStyle.normal,
+                                      letterSpacing: 0,
+                                    )),
+                              ),
+                            ),
+                          )
+                        else
+                          Material(
+                            color: Color(0xff00e1c2),
+                            borderRadius: BorderRadius.circular(32),
+                            child: InkWell(
+                              onTap: showFeedbackDialog,
+                              borderRadius: BorderRadius.circular(32),
+                              child: Container(
+                                height: 45,
+                                width: 170,
+                                alignment: Alignment.center,
+                                child: Text("Give Feedback",
                                     style: TextStyle(
                                       color: Color(0xff3a405a),
                                       fontSize: 14,
@@ -781,11 +698,11 @@ class _FifthPageState extends State<FifthPage>
                                     )),
                               ),
                             ),
-                          )
-                        ],
-                      ),
+                          ),
+                      ],
                     ),
-                  )
+                  ),
+                )
               ],
             ),
           ),
@@ -794,14 +711,142 @@ class _FifthPageState extends State<FifthPage>
     );
   }
 
+  showFeedbackDialog() {
+    Navigator.push(
+        context,
+        PageRouteBuilder(
+            fullscreenDialog: true,
+            opaque: false,
+            barrierColor:  Color(0xff2f313b),
+            barrierDismissible: false,
+            barrierLabel:
+                MaterialLocalizations.of(context).modalBarrierDismissLabel,
+            transitionDuration: Duration(milliseconds: 400),
+            transitionsBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child,
+            ) =>
+                AnimationTransition.fromBottom(
+                    animation, secondaryAnimation, child),
+            pageBuilder: (context, _, __) => FeedbackPage()));
+  }
+
+  showCartView(BookingProvider booking) async {
+    final ThemeData theme = Theme.of(context);
+    var media = MediaQuery.of(context);
+    Size size = media.size;
+    double getTopPadding() =>
+        (100 -
+            ((((appBar.preferredSize.height + media.padding.top) -
+                        appBar.bottom.preferredSize.height +
+                        10) /
+                    size.height) *
+                100)) /
+        100;
+    BookingProvider booking =
+        Provider.of<BookingProvider>(context, listen: false);
+    if (booking.canVibrate) await Vibrate.feedback(FeedbackType.light);
+    await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: Material(
+                child: Stack(
+                  children: <Widget>[
+                    DraggableScrollableSheet(
+                        initialChildSize: 0.65,
+                        minChildSize: 0.5,
+                        maxChildSize: getTopPadding(),
+                        builder: (context, controller) {
+                          return CartPage(
+                            scrollController: controller,
+                            onClosed: () {
+                              Navigator.of(context).pop();
+                            },
+                            isEditable: false,
+                          );
+                        }),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Consumer<BookingProvider>(builder: (context, booking, _)=>Container(
+                        height: 70 + media.padding.bottom / 2,
+                        padding: EdgeInsets.only(
+                            right: 20,
+                            left: 10,
+                            bottom: media.padding.bottom / 2),
+                        decoration: new BoxDecoration(
+                          color: theme.primaryColor,
+                          borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(20),
+                              topLeft: Radius.circular(20)),
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Row(
+                                children: <Widget>[
+                                  IconButton(
+                                    onPressed: null,
+                                    icon: Icon(
+                                      FeatherIcons.shoppingBag,
+                                      color: theme.accentColor,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:
+                                    EdgeInsets.symmetric(horizontal: 10),
+                                    child: Text(
+                                        "${(booking.addedServiceList == null || int.parse(booking.cartCount) == 0) ? "No" : booking.cartCount} services added",
+                                        style: TextStyle(
+                                          color: Color(0xffffffff),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          letterSpacing: 0,
+                                        )),
+                                  ),
+                                  Container(
+                                      width: 42,
+                                      height: 42,
+                                      padding: EdgeInsets.all(10),
+                                      margin:
+                                      EdgeInsets.symmetric(horizontal: 10),
+                                      child: Image.asset(
+                                        'assets/icons/arrow_right.png',
+                                        color: theme.accentColor,
+                                      )),
+                                  Expanded(
+                                    child: Text(booking.cartTotal,
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          color: Color(0xfffafafa),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w700,
+                                          fontStyle: FontStyle.normal,
+                                          letterSpacing: -0.01666666629413763,
+                                        )),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),),
+                    ),
+                  ],
+                ),
+              ),
+            ));
+  }
+
   Future<bool> onBackPressed() {
     if (focusNode.hasFocus) {
       focusNode.unfocus();
-      return Future.value(false);
-    } else if (showCartView) {
-      setState(() {
-        showCartView = false;
-      });
       return Future.value(false);
     } else {
       Navigator.pop(context);

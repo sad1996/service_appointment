@@ -21,8 +21,9 @@ class BookingProvider with ChangeNotifier {
   ModelDefault selectedMake;
   int selectedYear;
   ModelDefault selectedVehicleModel;
-  String selectedMiles = '15k';
-  ModelDefault selectedAdvisor;
+  double selectedMiles = 10;
+  ModelDefault selectedAdvisor =
+      ModelDefault('Any Service Advisor', 'assets/images/avatars/avtr_any.png');
   TransportType selectedTransportType;
   DateTime selectedDate;
   String selectedTimeSlot;
@@ -31,6 +32,41 @@ class BookingProvider with ChangeNotifier {
   String get cartCount => addedServiceList.length.toString();
 
   String get cartTotal => '\$' + getCartTotal().toStringAsFixed(2);
+
+  List<ServiceModel> primaryServices = [
+    ServiceModel(
+      id: 1,
+      serviceTitle: 'Factory Required',
+      serviceCharge: 91.95,
+      items: 3,
+      serviceAsset: 'assets/images/factory_required.png',
+    ),
+    ServiceModel(
+      id: 1,
+      serviceTitle: 'Value Preferred',
+      serviceCharge: 110.00,
+      items: 5,
+      serviceAsset: 'assets/images/value_preferred.png',
+    ),
+    ServiceModel(
+      id: 1,
+      serviceTitle: 'Premium Preferred',
+      serviceCharge: 180.00,
+      items: 9,
+      serviceAsset: 'assets/images/premium_preferred.png',
+    ),
+  ];
+
+  ServiceModel radioValue(ServiceModel model) => addedServiceList.contains(model) ? model : null;
+
+  checkAndInsert(ServiceModel value){
+    primaryServices.forEach((item){
+      if(addedServiceList.contains(item))
+        addedServiceList.remove(item);
+    });
+    addedServiceList.add(value);
+    notifyListeners();
+  }
 
   double getCartTotal() {
     double total = 0;
@@ -51,6 +87,12 @@ class BookingProvider with ChangeNotifier {
 
   setVehicleModel(ModelDefault value) {
     selectedVehicleModel = value;
+    notifyListeners();
+  }
+
+  setDefaultAdvisor() {
+    selectedAdvisor = ModelDefault(
+        'Any Service Advisor', 'assets/images/avatars/avtr_any.png');
     notifyListeners();
   }
 
@@ -75,10 +117,19 @@ class BookingProvider with ChangeNotifier {
   }
 
   addOrRemoveServiceToCart(ServiceModel value) {
-    if (addedServiceList.contains(value))
+    if (addedServiceList.contains(value)) {
       addedServiceList.remove(value);
-    else
+      print('coming here');
+    } else {
+      if (value.groupId != null)
+        addedServiceList.forEach((service) {
+          if (service.groupId == value.groupId) {
+            addedServiceList.remove(service);
+            print('found here');
+          }
+        });
       addedServiceList.add(value);
+    }
     notifyListeners();
   }
 
@@ -87,8 +138,20 @@ class BookingProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  setMiles(String value) {
+  setMiles(double value) {
     selectedMiles = value;
     notifyListeners();
+  }
+
+  clearAll() {
+    setDefaultAdvisor();
+    selectedTransportType = null;
+    selectedDate = null;
+    selectedTimeSlot = null;
+    selectedMake = null;
+    selectedYear = null;
+    selectedVehicleModel = null;
+    firstTextController.clear();
+    clearAddedServices();
   }
 }

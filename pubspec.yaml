@@ -38,6 +38,7 @@ flutter:
     - assets/images/avatars/
     - assets/images/transport_type/
     - assets/icons/
+    - assets/icons/feedback/
 
   fonts:
     - family: Inter

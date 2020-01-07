@@ -383,7 +383,6 @@ class _SecondPageState extends State<SecondPage> with TickerProviderStateMixin {
           child: Scaffold(
             backgroundColor: theme.primaryColor,
             appBar: appBar,
-            resizeToAvoidBottomInset: false,
             body: Stack(
               fit: StackFit.expand,
               children: <Widget>[
@@ -1174,28 +1173,16 @@ class _SecondPageState extends State<SecondPage> with TickerProviderStateMixin {
                                           child: IgnorePointer(
                                             ignoring: true,
                                             child: Container(
-                                              height: 65,
+                                              height: 10,
                                               decoration: BoxDecoration(
                                                   gradient: LinearGradient(
                                                       begin:
                                                           Alignment.topCenter,
-                                                      end: Alignment.center,
-                                                      stops: [
-                                                    0.0,
-                                                    0.4,
-                                                    0.6,
-                                                    0.8,
-                                                    0.9,
-                                                    1
-                                                  ],
+                                                      end: Alignment.bottomCenter,
                                                       colors: [
                                                     Colors.white,
-                                                    Colors.white60,
                                                     Colors.white54,
-                                                    Colors.white30,
                                                     Colors.white12,
-                                                    Colors.white
-                                                        .withOpacity(0.05),
                                                   ])),
                                             ),
                                           ),
@@ -1241,6 +1228,12 @@ class _SecondPageState extends State<SecondPage> with TickerProviderStateMixin {
         mainPageController.previousPage(
             duration: Duration(milliseconds: 1000), curve: Curves.easeIn);
       });
+      return Future.value(false);
+    } else if (mainPage == 0 &&
+        (booking.selectedMake != null ||
+            booking.selectedYear != null)) {
+      booking.setMake(null);
+      booking.setYear(null);
       return Future.value(false);
     } else {
       if (_animationController.value != 1) {

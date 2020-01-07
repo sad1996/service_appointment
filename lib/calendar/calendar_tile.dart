@@ -55,7 +55,7 @@ class CalendarTile extends StatelessWidget {
                   )
                 ),
               ),
-              if(isSelected)
+              if(Utils.isSameDay(date, DateTime.now()))
               Positioned(bottom: 7,
                 right: 0,
                 left: 0,

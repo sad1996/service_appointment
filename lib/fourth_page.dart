@@ -5,14 +5,15 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:pigment/pigment.dart';
 import 'package:provider/provider.dart';
+import 'package:service_appointment/advisors_page.dart';
 import 'package:service_appointment/bottom_list_item.dart';
 import 'package:service_appointment/calendar/calendar.dart';
 import 'package:service_appointment/cart_page.dart';
 import 'package:service_appointment/ensure_visibility.dart';
+import 'package:service_appointment/fifth_page.dart';
 import 'package:service_appointment/model/model_default.dart';
 import 'package:service_appointment/provider/booking_provider.dart';
 import 'package:vibrate/vibrate.dart';
-import 'package:service_appointment/fifth_page.dart';
 
 class FourthPage extends StatefulWidget {
   @override
@@ -22,11 +23,8 @@ class FourthPage extends StatefulWidget {
 class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
   AnimationController _animationController;
   AnimationController _appBarAnimationController;
-  AnimationController advisorListAnimationController;
   var duration = Duration(milliseconds: 500);
-  bool showCartView = false;
   int slotPage = 0;
-  int mainPage = 0;
   int tabIndex = 0;
   bool isTextEnabled = false;
   bool isEmailEnabled = false;
@@ -85,7 +83,7 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
         'assets/images/transport_type/self_dark.png'),
     TransportType(
         'Loaner',
-        'I need a loaner booking.selectedVehicle',
+        'I need a loaner vehicle',
         'assets/images/transport_type/loaner.png',
         'assets/images/transport_type/loaner_dark.png'),
     TransportType(
@@ -99,6 +97,7 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
         'assets/images/transport_type/shutter.png',
         'assets/images/transport_type/shutter_dark.png'),
   ];
+  AppBar appBar;
 
   @override
   void initState() {
@@ -106,8 +105,7 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
     pages.add(slotList.sublist(0, 12));
     pages.add(slotList.sublist(12, 24));
     pages.add(slotList.sublist(24, 25));
-    advisorListAnimationController =
-        AnimationController(duration: duration, vsync: this);
+
     timeSlotPageController = PageController(initialPage: slotPage);
     tabController =
         TabController(initialIndex: tabIndex, vsync: this, length: 2);
@@ -132,7 +130,6 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    advisorListAnimationController.dispose();
     _appBarAnimationController.dispose();
     _animationController.dispose();
     super.dispose();
@@ -161,86 +158,77 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
     Size size = media.size;
     BookingProvider booking = Provider.of<BookingProvider>(context);
 
-    AppBar appBar = AppBar(
+    appBar = AppBar(
       backgroundColor: theme.primaryColor,
       leading: IconButton(
           icon: Icon(FeatherIcons.chevronLeft),
           onPressed: () => onBackPressed(booking)),
-      title: showCartView
-          ? Text("Service Cart",
-              style: TextStyle(
-                color: Color(0xfffafafa),
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                fontStyle: FontStyle.normal,
-                letterSpacing: -0.009999999776482582,
-              ))
-          : AnimatedCrossFade(
-              duration: duration,
-              crossFadeState: _appBarAnimationController.value > 0
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              sizeCurve: Curves.decelerate,
-              firstChild: IgnorePointer(
-                ignoring: _appBarAnimationController.value > 0,
-                child: GestureDetector(
-                  onTap: () {
-                    _appBarAnimationController.forward();
-                    _animationController.reverse();
-                    FocusScope.of(context).requestFocus(FocusNode());
-                  },
-                  child: Material(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        SizedBox(
-                          width: 25,
-                        ),
-                        Column(
-                          children: <Widget>[
-                            Text(booking.selectedMake.name,
-                                style: TextStyle(
-                                  color: Color(0xffffffff),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  letterSpacing: 0,
-                                )),
-                            Text(
-                                booking.selectedYear.toString() +
-                                    ' ' +
-                                    booking.selectedVehicleModel.name,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: Color(0xfffafafa),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  fontStyle: FontStyle.normal,
-                                  letterSpacing: -0.009999999776482582,
-                                ))
-                          ],
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Colors.white,
-                        )
-                      ],
-                    ),
+      title: AnimatedCrossFade(
+        duration: duration,
+        crossFadeState: _appBarAnimationController.value > 0
+            ? CrossFadeState.showSecond
+            : CrossFadeState.showFirst,
+        sizeCurve: Curves.decelerate,
+        firstChild: IgnorePointer(
+          ignoring: _appBarAnimationController.value > 0,
+          child: GestureDetector(
+            onTap: () {
+              _appBarAnimationController.forward();
+              _animationController.reverse();
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+            child: Material(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    width: 25,
                   ),
-                ),
-              ),
-              secondChild: Container(
-                height: 50,
-                alignment: Alignment.center,
-                child: Text('Vehicle Profile',
-                    style: textTheme.subhead.copyWith(
-                        color: Colors.white, fontWeight: FontWeight.w600)),
+                  Column(
+                    children: <Widget>[
+                      Text(booking.selectedMake.name,
+                          style: TextStyle(
+                            color: Color(0xffffffff),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.normal,
+                            letterSpacing: 0,
+                          )),
+                      Text(
+                          booking.selectedYear.toString() +
+                              ' ' +
+                              booking.selectedVehicleModel.name,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            color: Color(0xfffafafa),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            fontStyle: FontStyle.normal,
+                            letterSpacing: -0.009999999776482582,
+                          ))
+                    ],
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Colors.white,
+                  )
+                ],
               ),
             ),
+          ),
+        ),
+        secondChild: Container(
+          height: 50,
+          alignment: Alignment.center,
+          child: Text('Vehicle Profile',
+              style: textTheme.subhead
+                  .copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+        ),
+      ),
       centerTitle: true,
       actions: <Widget>[
         IconButton(
@@ -252,7 +240,7 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
         ),
         SizedBox(width: 7)
       ],
-      bottom: hasFocus || showCartView
+      bottom: hasFocus
           ? PreferredSize(
               child: SizedBox(),
               preferredSize: Size.fromHeight(10),
@@ -493,10 +481,10 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                               splashColor: Colors.transparent,
                             ),
                             child: IgnorePointer(
-                              ignoring: (booking.selectedAdvisor == null ||
-                                  booking.selectedTransportType == null ||
-                                  booking.selectedDate == null ||
-                                  booking.selectedTimeSlot == null),
+                              ignoring:
+                                  (booking.selectedTransportType == null ||
+                                      booking.selectedDate == null ||
+                                      booking.selectedTimeSlot == null),
                               child: TabBar(
                                 controller: tabController,
                                 indicator: UnderlineTabIndicator(
@@ -506,6 +494,10 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                         EdgeInsets.only(right: 60, left: 17)),
                                 indicatorColor: theme.accentColor,
                                 labelColor: Colors.white,
+                                onTap: (tab) {
+                                  if (booking.canVibrate)
+                                    Vibrate.feedback(FeedbackType.light);
+                                },
                                 unselectedLabelColor: Color(0xff4e515a),
                                 isScrollable: true,
                                 tabs: [
@@ -541,6 +533,7 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                   .value,
             ),
     );
+
     return WillPopScope(
       onWillPop: () => onBackPressed(booking),
       child: GestureDetector(
@@ -550,31 +543,11 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
               }
             : null,
         child: Scaffold(
-          appBar: PreferredSize(
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                appBar,
-                if (showCartView)
-                  InkWell(
-                      onTap: () {
-                        setState(() {
-                          showCartView = false;
-                        });
-                      },
-                      child: Container(
-                        color: Colors.black45,
-                        child: Center(),
-                      ))
-              ],
-            ),
-            preferredSize: appBar.preferredSize,
-          ),
+          appBar: appBar,
           backgroundColor: theme.primaryColor,
           resizeToAvoidBottomPadding: true,
           body: Stack(
             alignment: Alignment.bottomCenter,
-            fit: StackFit.expand,
             children: <Widget>[
               Align(
                   alignment: Alignment.bottomCenter,
@@ -590,12 +563,10 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                         .toDouble(),
                     child: Column(
                       children: <Widget>[
-                        if (_appBarAnimationController.value == 0)
+                        if (_appBarAnimationController.value == 0 &&
+                            booking.selectedDate != null)
                           AnimatedCrossFade(
-                            crossFadeState: (booking.selectedAdvisor == null &&
-                                        booking.selectedTransportType ==
-                                            null) ||
-                                    hasFocus
+                            crossFadeState: hasFocus
                                 ? CrossFadeState.showSecond
                                 : CrossFadeState.showFirst,
                             duration: duration,
@@ -608,11 +579,8 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                 padding: EdgeInsets.symmetric(horizontal: 25),
                                 child: Row(
                                   children: <Widget>[
-                                    AnimatedContainer(
-                                      duration: Duration(milliseconds: 600),
-                                      height: booking.selectedAdvisor != null
-                                          ? 50
-                                          : 0,
+                                    Container(
+                                      height: 50,
                                       margin: EdgeInsets.only(
                                           bottom: 25, right: 15),
                                       child: Material(
@@ -623,57 +591,40 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                             if (booking.canVibrate)
                                               Vibrate.feedback(
                                                   FeedbackType.light);
-                                            booking.setAdvisor(null);
-                                            setState(() {
-                                              if (mainPage != 0) {
-                                                mainPage = 0;
-                                                if (tabIndex != 0)
-                                                  tabController.animateTo(0,
-                                                      duration: duration,
-                                                      curve: Curves.easeIn);
-                                              }
-                                            });
+                                            showAdvisorView();
                                           },
                                           borderRadius:
                                               BorderRadius.circular(25),
-                                          child: booking.selectedAdvisor != null
-                                              ? Padding(
-                                                  padding: EdgeInsets.symmetric(
-                                                      vertical: 10,
-                                                      horizontal: 15),
-                                                  child: Row(
-                                                    children: <Widget>[
-                                                      Image.asset(booking
-                                                          .selectedAdvisor
-                                                          .asset),
-                                                      SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                bottom: 3),
-                                                        child: Text(
-                                                            booking
-                                                                .selectedAdvisor
-                                                                .name,
-                                                            style: TextStyle(
-                                                              color: Color(
-                                                                  0xffffffff),
-                                                              fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              fontStyle:
-                                                                  FontStyle
-                                                                      .normal,
-                                                              letterSpacing: 0,
-                                                            )),
-                                                      )
-                                                    ],
-                                                  ),
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 10, horizontal: 15),
+                                            child: Row(
+                                              children: <Widget>[
+                                                Image.asset(booking
+                                                    .selectedAdvisor.asset),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 3),
+                                                  child: Text(
+                                                      booking
+                                                          .selectedAdvisor.name,
+                                                      style: TextStyle(
+                                                        color:
+                                                            Color(0xffffffff),
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        fontStyle:
+                                                            FontStyle.normal,
+                                                        letterSpacing: 0,
+                                                      )),
                                                 )
-                                              : SizedBox(),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -694,7 +645,6 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                   FeedbackType.light);
                                             booking.setTransportType(null);
                                             setState(() {
-                                              if (mainPage != 0) mainPage = 0;
                                               if (tabIndex != 0)
                                                 tabController.animateTo(0,
                                                     duration: duration,
@@ -779,114 +729,112 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                       ].map((tab) {
                                         if (tab == 'Appointment') {
                                           if (_animationController.value > 0.8)
-                                            return AnimatedCrossFade(
-                                              duration: duration,
-                                              firstChild: Container(
-                                                color: Color(0xfff8f8f8),
-                                                child: SingleChildScrollView(
-                                                  padding: EdgeInsets.only(
-                                                      bottom: ((!hasFocus &&
-                                                                  tabIndex != 0)
-                                                              ? 140
-                                                              : 70) +
-                                                          media.padding.bottom /
-                                                              2),
-                                                  child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .stretch,
-                                                      children: <Widget>[
-                                                        AnimatedContainer(
-                                                          duration: Duration(
-                                                              milliseconds:
-                                                                  500),
-                                                          height: booking
-                                                                      .selectedAdvisor !=
-                                                                  null
-                                                              ? 0
-                                                              : (size.height /
-                                                                      4) +
-                                                                  90,
-                                                          child: Stack(
-                                                            children: <Widget>[
-                                                              SingleChildScrollView(
-                                                                child: Container(
-                                                                  decoration: BoxDecoration(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      borderRadius: BorderRadius.only(
-                                                                          bottomLeft:
-                                                                              Radius.circular(
-                                                                                  20),
-                                                                          bottomRight:
-                                                                              Radius.circular(20))),
-                                                                  child: Column(
-                                                                    children: <
-                                                                        Widget>[
-                                                                      Container(
-                                                                        height:
-                                                                            size.height /
-                                                                                4,
-                                                                        alignment:
-                                                                            Alignment
-                                                                                .bottomCenter,
-                                                                        child: Image
-                                                                            .asset(
-                                                                          'assets/images/appointment.png',
-                                                                          height:
-                                                                              size.height /
-                                                                                  6,
-                                                                        ),
-                                                                      ),
-                                                                      Padding(
-                                                                          padding: EdgeInsets.symmetric(
-                                                                              horizontal:
-                                                                                  10,
-                                                                              vertical:
-                                                                                  35),
-                                                                          child: Text(
-                                                                              "Appointment time slots will be based on the selected service advisor and transportation choices.",
-                                                                              textAlign:
-                                                                                  TextAlign.center,
-                                                                              style: TextStyle(
-                                                                                color: Color(0xffb9c1d3),
-                                                                                fontSize: 12,
-                                                                                fontWeight: FontWeight.w700,
-                                                                                fontStyle: FontStyle.italic,
-                                                                                letterSpacing: 0,
-                                                                              )))
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Image.asset(
-                                                                'assets/images/group0.png',
-                                                                height:
-                                                                    size.height /
-                                                                        6,
-                                                                alignment:
-                                                                    Alignment
-                                                                        .topLeft,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 25,
-                                                        ),
-                                                        Container(
+                                            return Container(
+                                              color: !isCalendarExpanded
+                                                  ? Colors.white
+                                                  : Color(0xfff8f8f8),
+                                              child: SingleChildScrollView(
+                                                padding: EdgeInsets.only(
+                                                    bottom: 70 +
+                                                        media.padding.bottom /
+                                                            2),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment
+                                                          .stretch,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: <Widget>[
+                                                    ConstrainedBox(
+                                                      constraints:
+                                                          new BoxConstraints(
+                                                              maxHeight: double
+                                                                  .infinity),
+                                                      child: Calendar(
+                                                        isExpandable: booking
+                                                                .selectedDate ==
+                                                            null,
+                                                        initialCalendarDateOverride:
+                                                            DateTime.now(),
+                                                        onExpanded:
+                                                            (isExpanded) {
+                                                          setState(() {
+                                                            isCalendarExpanded =
+                                                                isExpanded;
+                                                          });
+                                                        },
+                                                        onDateSelected:
+                                                            (date) async {
+                                                          if (booking
+                                                              .canVibrate)
+                                                            Vibrate.feedback(
+                                                                FeedbackType
+                                                                    .light);
+                                                          booking.setDate(date);
+                                                        },
+                                                      ),
+                                                    ),
+                                                    if (booking.selectedDate ==
+                                                        null)
+                                                      Padding(
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                                vertical: 40,
+                                                                horizontal: 30),
+                                                        child: Text(
+                                                            "Choose a date to see the available time slot for your Service appointment",
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              color: Color(
+                                                                  0xffb9c1d3),
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic,
+                                                              letterSpacing: 0,
+                                                            )),
+                                                      )
+                                                    else
+                                                      AnimatedCrossFade(
+                                                        duration: Duration(
+                                                            milliseconds: 800),
+                                                        crossFadeState:
+                                                            booking.selectedTransportType ==
+                                                                    null
+                                                                ? CrossFadeState
+                                                                    .showFirst
+                                                                : CrossFadeState
+                                                                    .showSecond,
+                                                        firstCurve:
+                                                            Curves.easeIn,
+                                                        secondCurve:
+                                                            Curves.easeOut,
+                                                        firstChild: Container(
+                                                          color: Pigment
+                                                              .fromString(
+                                                                  '#F8F8F8'),
                                                           child: Column(
                                                             crossAxisAlignment:
                                                                 CrossAxisAlignment
-                                                                    .start,
+                                                                    .stretch,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
                                                             children: <Widget>[
+                                                              SizedBox(
+                                                                height: 20,
+                                                              ),
                                                               Padding(
                                                                 padding: EdgeInsets
                                                                     .symmetric(
                                                                         horizontal:
                                                                             25),
                                                                 child: Text(
-                                                                    "Service Advisor",
+                                                                    "Transport Type",
                                                                     style:
                                                                         TextStyle(
                                                                       color: Color(
@@ -903,299 +851,124 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                                           0,
                                                                     )),
                                                               ),
-                                                              SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                              if (_animationController
-                                                                      .value ==
-                                                                  1)
-                                                                Container(
-                                                                  height: 140,
-                                                                  child: ListView
-                                                                      .separated(
-                                                                          scrollDirection: Axis
-                                                                              .horizontal,
-                                                                          padding: EdgeInsets.symmetric(
-                                                                              horizontal:
-                                                                                  25,
-                                                                              vertical:
-                                                                                  10),
-                                                                          itemCount: advisors
-                                                                              .length,
-                                                                          itemBuilder: (context,
-                                                                              index) {
-                                                                            ModelDefault
-                                                                                model =
-                                                                                advisors[index];
-                                                                            var count =
-                                                                                advisors.length;
-                                                                            var animation =
-                                                                                Tween(begin: 0.0, end: 1.0).animate(
-                                                                              CurvedAnimation(
-                                                                                parent: advisorListAnimationController,
-                                                                                curve: Interval((1 / count) * index, 1.0, curve: Curves.fastOutSlowIn),
+                                                              StaggeredGridView
+                                                                  .count(
+                                                                shrinkWrap:
+                                                                    true,
+                                                                physics:
+                                                                    NeverScrollableScrollPhysics(),
+                                                                crossAxisCount:
+                                                                    2,
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .all(
+                                                                            10),
+                                                                mainAxisSpacing:
+                                                                    0.0,
+                                                                crossAxisSpacing:
+                                                                    0.0,
+                                                                children:
+                                                                    transportTypes
+                                                                        .map(
+                                                                            (transportType) {
+                                                                  return Container(
+                                                                    margin: EdgeInsets
+                                                                        .all(
+                                                                            10),
+                                                                    child:
+                                                                        Material(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              32),
+                                                                      elevation:
+                                                                          2,
+                                                                      shadowColor:
+                                                                          Colors
+                                                                              .white24,
+                                                                      color: Colors
+                                                                          .white,
+                                                                      child:
+                                                                          InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          if (booking
+                                                                              .canVibrate)
+                                                                            Vibrate.feedback(FeedbackType.light);
+                                                                          booking
+                                                                              .setTransportType(transportType);
+                                                                        },
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(32),
+                                                                        child:
+                                                                            Container(
+                                                                          height:
+                                                                              60,
+                                                                          padding:
+                                                                              EdgeInsets.only(right: 30),
+                                                                          child:
+                                                                              Row(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.min,
+                                                                            children: <Widget>[
+                                                                              Padding(
+                                                                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                                                                                child: Image.asset(
+                                                                                  transportType.asset,
+                                                                                  width: 25,
+                                                                                ),
                                                                               ),
-                                                                            );
-                                                                            advisorListAnimationController.forward();
-                                                                            return AnimatedBuilder(
-                                                                                animation: advisorListAnimationController,
-                                                                                builder: (BuildContext context, Widget child) {
-                                                                                  return FadeTransition(
-                                                                                      opacity: animation,
-                                                                                      child: new Transform(
-                                                                                          transform: new Matrix4.translationValues(50 * (1.0 - animation.value), 0.0, 0.0),
-                                                                                          child: Container(
-                                                                                            alignment: Alignment.center,
-                                                                                            width: 85,
-                                                                                            height: 140,
-                                                                                            child: Material(
-                                                                                              color: Colors.white,
-                                                                                              borderRadius: BorderRadius.circular(10),
-                                                                                              elevation: 2,
-                                                                                              shadowColor: Colors.white24,
-                                                                                              child: InkWell(
-                                                                                                onTap: () async {
-                                                                                                  if (booking.canVibrate) Vibrate.feedback(FeedbackType.light);
-                                                                                                  booking.setAdvisor(model);
-                                                                                                  setState(() {
-                                                                                                    if (booking.selectedTransportType != null) if (mainPage == 0) {
-                                                                                                      mainPage = 1;
-                                                                                                    }
-                                                                                                  });
-                                                                                                },
-                                                                                                borderRadius: BorderRadius.circular(10),
-                                                                                                child: Material(
-                                                                                                  child: Column(
-                                                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                                                    children: <Widget>[
-                                                                                                      Image.asset(
-                                                                                                        model.asset,
-                                                                                                        width: 65,
-                                                                                                        height: 50,
-                                                                                                      ),
-                                                                                                      Padding(
-                                                                                                        padding: EdgeInsets.all(8),
-                                                                                                        child: Text(model.name,
-                                                                                                            maxLines: 2,
-                                                                                                            overflow: TextOverflow.ellipsis,
-                                                                                                            softWrap: true,
-                                                                                                            textAlign: TextAlign.center,
-                                                                                                            style: TextStyle(
-                                                                                                              color: Color(0xff3a405a),
-                                                                                                              fontSize: 12,
-                                                                                                              fontWeight: FontWeight.w400,
-                                                                                                              fontStyle: FontStyle.normal,
-                                                                                                              letterSpacing: 0,
-                                                                                                            )),
-                                                                                                      )
-                                                                                                    ],
-                                                                                                  ),
-                                                                                                ),
-                                                                                              ),
-                                                                                            ),
-                                                                                          )));
-                                                                                });
-                                                                          },
-                                                                          separatorBuilder: (context, index) =>
-                                                                              SizedBox(width: 13)),
-                                                                ),
-                                                              SizedBox(
-                                                                height: 20,
+                                                                              Expanded(
+                                                                                child: Column(
+                                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                  children: <Widget>[
+                                                                                    Text(transportType.title,
+                                                                                        maxLines: 1,
+                                                                                        overflow: TextOverflow.ellipsis,
+                                                                                        softWrap: true,
+                                                                                        style: TextStyle(
+                                                                                          color: Color(0xff1f2136),
+                                                                                          fontSize: 14,
+                                                                                          fontWeight: FontWeight.w700,
+                                                                                          fontStyle: FontStyle.normal,
+                                                                                          letterSpacing: 0,
+                                                                                        )),
+                                                                                    Text(transportType.subTitle,
+                                                                                        maxLines: 1,
+                                                                                        overflow: TextOverflow.ellipsis,
+                                                                                        softWrap: true,
+                                                                                        style: TextStyle(
+                                                                                          color: Color(0xff66718a),
+                                                                                          fontSize: 10,
+                                                                                          fontWeight: FontWeight.w600,
+                                                                                          fontStyle: FontStyle.normal,
+                                                                                          letterSpacing: 0,
+                                                                                        ))
+                                                                                  ],
+                                                                                ),
+                                                                              )
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }).toList(),
+                                                                staggeredTiles:
+                                                                    transportTypes
+                                                                        .map(
+                                                                            (_) {
+                                                                  return StaggeredTile
+                                                                      .fit(1);
+                                                                }).toList(),
                                                               ),
+                                                              SizedBox(
+                                                                height: 100,
+                                                              )
                                                             ],
                                                           ),
                                                         ),
-                                                        if (booking
-                                                                .selectedAdvisor !=
-                                                            null)
-                                                          Container(
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: <
-                                                                  Widget>[
-                                                                Padding(
-                                                                  padding: EdgeInsets
-                                                                      .symmetric(
-                                                                          horizontal:
-                                                                              25),
-                                                                  child: Text(
-                                                                      "Transport Type",
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color: Color(
-                                                                            0xffb9c1d3),
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w700,
-                                                                        fontStyle:
-                                                                            FontStyle.italic,
-                                                                        letterSpacing:
-                                                                            0,
-                                                                      )),
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 10,
-                                                                ),
-                                                                Container(
-                                                                  height: 80,
-                                                                  child: ListView
-                                                                      .separated(
-                                                                          scrollDirection: Axis
-                                                                              .horizontal,
-                                                                          padding: EdgeInsets.symmetric(
-                                                                              vertical:
-                                                                                  10,
-                                                                              horizontal:
-                                                                                  25),
-                                                                          itemCount: transportTypes
-                                                                              .length,
-                                                                          itemBuilder: (context,
-                                                                              index) {
-                                                                            var transportType =
-                                                                                transportTypes[index];
-
-                                                                            return Material(
-                                                                              borderRadius: BorderRadius.circular(32),
-                                                                              elevation: 2,
-                                                                              shadowColor: Colors.white24,
-                                                                              color: Colors.white,
-                                                                              child: InkWell(
-                                                                                onTap: () async {
-                                                                                  if (booking.canVibrate)Vibrate.feedback(FeedbackType.light);
-
-                                                                                  booking.setTransportType(transportType);
-                                                                                  setState(() {
-                                                                                    if (booking.selectedAdvisor != null) if (mainPage == 0) {
-                                                                                      mainPage = 1;
-                                                                                    }
-                                                                                  });
-                                                                                },
-                                                                                borderRadius: BorderRadius.circular(32),
-                                                                                child: Container(
-                                                                                  height: 80,
-                                                                                  padding: EdgeInsets.only(right: 30),
-                                                                                  child: Row(
-                                                                                    children: <Widget>[
-                                                                                      Padding(
-                                                                                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                                                                                        child: Image.asset(transportType.asset),
-                                                                                      ),
-                                                                                      Column(
-                                                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                        children: <Widget>[
-                                                                                          Text(transportType.title,
-                                                                                              style: TextStyle(
-                                                                                                color: Color(0xff1f2136),
-                                                                                                fontSize: 14,
-                                                                                                fontWeight: FontWeight.w700,
-                                                                                                fontStyle: FontStyle.normal,
-                                                                                                letterSpacing: 0,
-                                                                                              )),
-                                                                                          Text(transportType.subTitle,
-                                                                                              style: TextStyle(
-                                                                                                color: Color(0xff66718a),
-                                                                                                fontSize: 10,
-                                                                                                fontWeight: FontWeight.w600,
-                                                                                                fontStyle: FontStyle.normal,
-                                                                                                letterSpacing: 0,
-                                                                                              ))
-                                                                                        ],
-                                                                                      )
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                            );
-                                                                          },
-                                                                          separatorBuilder: (context, index) =>
-                                                                              SizedBox(width: 20)),
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 15,
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                      ]),
-                                                ),
-                                              ),
-                                              secondChild: Container(
-                                                color: isCalendarExpanded
-                                                    ? Color(0xfff8f8f8)
-                                                    : Colors.white,
-                                                child: SingleChildScrollView(
-                                                  padding: EdgeInsets.only(
-                                                      bottom: 70 +
-                                                          media.padding.bottom /
-                                                              2),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .stretch,
-                                                    children: <Widget>[
-                                                      ConstrainedBox(
-                                                        constraints:
-                                                            new BoxConstraints(
-                                                                maxHeight: double
-                                                                    .infinity),
-                                                        child: Calendar(
-                                                          isExpandable: booking
-                                                                  .selectedDate ==
-                                                              null,
-                                                          initialCalendarDateOverride:
-                                                              DateTime.now(),
-                                                          onExpanded:
-                                                              (isExpanded) {
-                                                            setState(() {
-                                                              isCalendarExpanded =
-                                                                  isExpanded;
-                                                            });
-                                                          },
-                                                          onDateSelected:
-                                                              (date) async {
-                                                                if (booking.canVibrate)
-                                                              Vibrate.feedback(
-                                                                  FeedbackType
-                                                                      .light);
-                                                            booking
-                                                                .setDate(date);
-                                                          },
-                                                        ),
-                                                      ),
-                                                      if (booking
-                                                              .selectedDate ==
-                                                          null)
-                                                        Padding(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  vertical: 40,
-                                                                  horizontal:
-                                                                      30),
-                                                          child: Text(
-                                                              "Choose a date to see the available time slot for your Service appointment",
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                color: Color(
-                                                                    0xffb9c1d3),
-                                                                fontSize: 12,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700,
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic,
-                                                                letterSpacing:
-                                                                    0,
-                                                              )),
-                                                        )
-                                                      else
-                                                        Container(
+                                                        secondChild: Container(
                                                           color:
                                                               Color(0xfff8f8f8),
                                                           height: 400,
@@ -1241,8 +1014,8 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                                           onPressed: slotPage == 0
                                                                               ? null
                                                                               : () async {
-                                                                            if (booking.canVibrate) Vibrate.feedback(FeedbackType.light);
-                                                                                  timeSlotPageController.previousPage(duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+                                                                                  if (booking.canVibrate) Vibrate.feedback(FeedbackType.light);
+                                                                                  timeSlotPageController.previousPage(duration: Duration(milliseconds: 500), curve: Curves.easeIn);
                                                                                 },
                                                                         ),
                                                                         SizedBox(
@@ -1260,8 +1033,8 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                                           onPressed: slotPage > 1
                                                                               ? null
                                                                               : () async {
-                                                                            if (booking.canVibrate) Vibrate.feedback(FeedbackType.light);
-                                                                                  timeSlotPageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                                                  if (booking.canVibrate) Vibrate.feedback(FeedbackType.light);
+                                                                                  timeSlotPageController.nextPage(duration: Duration(milliseconds: 500), curve: Curves.easeOut);
                                                                                 },
                                                                         ),
                                                                         SizedBox(
@@ -1308,7 +1081,7 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                                                     child: Material(
                                                                                       child: InkWell(
                                                                                         onTap: () async {
-                                                                                          if (booking.canVibrate)Vibrate.feedback(FeedbackType.light);
+                                                                                          if (booking.canVibrate) Vibrate.feedback(FeedbackType.light);
                                                                                           booking.setTimeSlot(slot);
                                                                                           tabController.animateTo(1, duration: duration, curve: Curves.easeOut);
                                                                                         },
@@ -1337,15 +1110,10 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                             ],
                                                           ),
                                                         ),
-                                                    ],
-                                                  ),
+                                                      ),
+                                                  ],
                                                 ),
                                               ),
-                                              firstCurve: Curves.easeIn,
-                                              secondCurve: Curves.easeOut,
-                                              crossFadeState: mainPage == 0
-                                                  ? CrossFadeState.showFirst
-                                                  : CrossFadeState.showSecond,
                                             );
                                           else
                                             return SizedBox();
@@ -1422,6 +1190,12 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                                       FeedbackType
                                                                           .light);
                                                               },
+                                                              keyboardType:
+                                                                  TextInputType
+                                                                      .text,
+                                                              textInputAction:
+                                                                  TextInputAction
+                                                                      .done,
                                                               decoration:
                                                                   InputDecoration(
                                                                       border: OutlineInputBorder(
@@ -1493,6 +1267,12 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                                       FeedbackType
                                                                           .light);
                                                               },
+                                                              keyboardType:
+                                                                  TextInputType
+                                                                      .text,
+                                                              textInputAction:
+                                                                  TextInputAction
+                                                                      .done,
                                                               decoration:
                                                                   InputDecoration(
                                                                       border: OutlineInputBorder(
@@ -1567,6 +1347,9 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                               keyboardType:
                                                                   TextInputType
                                                                       .emailAddress,
+                                                              textInputAction:
+                                                                  TextInputAction
+                                                                      .done,
                                                               decoration:
                                                                   InputDecoration(
                                                                       border: OutlineInputBorder(
@@ -1634,6 +1417,9 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                                                               keyboardType:
                                                                   TextInputType
                                                                       .number,
+                                                              textInputAction:
+                                                                  TextInputAction
+                                                                      .done,
                                                               onTap: () {
                                                                 if (booking
                                                                     .canVibrate)
@@ -1803,247 +1589,7 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
                       ],
                     ),
                   )),
-              if (showCartView)
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      showCartView = false;
-                    });
-                  },
-                  child: Container(
-                    color: Colors.black45,
-                    alignment: Alignment.bottomCenter,
-                    child: DraggableScrollableSheet(
-                        initialChildSize: 1,
-                        minChildSize: 0.5,
-                        maxChildSize: 1,
-                        builder: (context, controller) {
-                          return CartPage(
-                            scrollController: controller,
-                            onClosed: () {
-                              setState(() {
-                                showCartView = false;
-                              });
-                            },
-                          );
-                        }),
-                  ),
-                ),
-              if (_appBarAnimationController.value == 0)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      Container(
-                        height:
-                            (hasFocus ? 70 : (tabIndex != 0 ? 70 + 70 : 70)) +
-                                media.padding.bottom / 2,
-                        padding: EdgeInsets.only(
-                            top: 12,
-                            right: 20,
-                            left: 10,
-                            bottom: media.padding.bottom / 2),
-                        decoration: new BoxDecoration(
-                          color: theme.primaryColor,
-                          borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(20),
-                              topLeft: Radius.circular(20)),
-                          boxShadow: [
-                            if (!showCartView) ...{
-                              BoxShadow(
-                                  color: Color(0x51000000),
-                                  offset: Offset(0, 8),
-                                  blurRadius: 16,
-                                  spreadRadius: 0),
-                              BoxShadow(
-                                  color: Color(0x0a000000),
-                                  offset: Offset(0, 2),
-                                  blurRadius: 4,
-                                  spreadRadius: 0)
-                            }
-                          ],
-                        ),
-                        child: Column(
-                          children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Row(
-                                    children: <Widget>[
-                                      IconButton(
-                                        onPressed: showCartView
-                                            ? null
-                                            : () {
-                                                setState(() {
-                                                  showCartView = true;
-                                                });
-                                              },
-                                        icon: Icon(
-                                          FeatherIcons.shoppingBag,
-                                          color: theme.accentColor,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        child: Text(
-                                            "${(booking.addedServiceList == null || int.parse(booking.cartCount) == 0) ? "No" : booking.cartCount} services added",
-                                            style: TextStyle(
-                                              color: Color(0xffffffff),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w400,
-                                              fontStyle: FontStyle.normal,
-                                              letterSpacing: 0,
-                                            )),
-                                      ),
-                                      if (tabIndex == 0) ...{
-                                        SizedBox(width: 20),
-                                        Text(booking.cartTotal,
-                                            style: TextStyle(
-                                              color: Color(0xfffafafa),
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700,
-                                              fontStyle: FontStyle.normal,
-                                              letterSpacing:
-                                                  -0.01666666629413763,
-                                            ))
-                                      } else ...{
-                                        Container(
-                                            width: 42,
-                                            height: 42,
-                                            padding: EdgeInsets.all(10),
-                                            margin: EdgeInsets.symmetric(
-                                                horizontal: 10),
-                                            child: Image.asset(
-                                              'assets/icons/arrow_right.png',
-                                              color: theme.accentColor,
-                                            )),
-                                        Expanded(
-                                          child: Text(booking.cartTotal,
-                                              textAlign: TextAlign.end,
-                                              style: TextStyle(
-                                                color: Color(0xfffafafa),
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w700,
-                                                fontStyle: FontStyle.normal,
-                                                letterSpacing:
-                                                    -0.01666666629413763,
-                                              )),
-                                        )
-                                      }
-                                    ],
-                                  ),
-                                ),
-                                if (tabIndex == 0)
-                                  Material(
-                                    type: MaterialType.circle,
-                                    color: (booking.selectedAdvisor == null ||
-                                            booking.selectedTransportType ==
-                                                null ||
-                                            booking.selectedDate == null ||
-                                            booking.selectedTimeSlot == null)
-                                        ? Color(0xff4e515a)
-                                        : theme.accentColor,
-                                    elevation: (booking.selectedAdvisor ==
-                                                null ||
-                                            booking.selectedTransportType ==
-                                                null ||
-                                            booking.selectedDate == null ||
-                                            booking.selectedTimeSlot == null)
-                                        ? 0
-                                        : 7,
-                                    child: InkWell(
-                                      onTap: (booking.selectedAdvisor == null ||
-                                              booking.selectedTransportType ==
-                                                  null ||
-                                              booking.selectedDate == null ||
-                                              booking.selectedTimeSlot == null)
-                                          ? null
-                                          : () {
-                                              if (booking.canVibrate)
-                                                Vibrate.feedback(
-                                                    FeedbackType.light);
-                                              tabController.animateTo(1,
-                                                  duration: duration,
-                                                  curve: Curves.easeOut);
-                                            },
-                                      customBorder: CircleBorder(),
-                                      child: Container(
-                                          width: 42,
-                                          height: 42,
-                                          padding: EdgeInsets.all(10),
-                                          child: Image.asset(
-                                            'assets/icons/arrow_right.png',
-                                            color: (booking.selectedAdvisor ==
-                                                        null ||
-                                                    booking.selectedTransportType ==
-                                                        null ||
-                                                    booking.selectedDate ==
-                                                        null ||
-                                                    booking.selectedTimeSlot ==
-                                                        null)
-                                                ? Colors.white24
-                                                : null,
-                                          )),
-                                    ),
-                                  )
-                              ],
-                            ),
-                            if (!hasFocus && tabIndex != 0)
-                              Padding(
-                                padding: EdgeInsets.symmetric(vertical: 10),
-                                child: Material(
-                                  color: Color(0xff00e1c2),
-                                  borderRadius: BorderRadius.circular(32),
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (booking.canVibrate)
-                                        Vibrate.feedback(FeedbackType.light);
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => FifthPage(),
-                                              fullscreenDialog: true));
-                                    },
-                                    borderRadius: BorderRadius.circular(32),
-                                    child: Container(
-                                      height: 55,
-                                      width: 308,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Text("Schedule Appointment",
-                                              style: TextStyle(
-                                                color: Color(0xff2f313b),
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                fontStyle: FontStyle.normal,
-                                                letterSpacing: 0,
-                                              )),
-                                          Text(
-                                              "${DateFormat("EEE, MMM dd").format(booking.selectedDate)}  " +
-                                                  booking.selectedTimeSlot,
-                                              style: TextStyle(
-                                                color: Color(0xff3a405a),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700,
-                                                fontStyle: FontStyle.normal,
-                                                letterSpacing: 0,
-                                              ))
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                )
+              bottomBar(true)
             ],
           ),
         ),
@@ -2051,14 +1597,345 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
     );
   }
 
+  bottomBar(bool canTap) {
+    final ThemeData theme = Theme.of(context);
+    var media = MediaQuery.of(context);
+
+    if (_appBarAnimationController.value == 0)
+      return Align(
+        alignment: Alignment.bottomCenter,
+        child: Consumer<BookingProvider>(builder: (context, booking, _)=> Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              height: (hasFocus
+                  ? 70
+                  : (tabIndex == 0
+                  ? (booking.selectedDate != null ? 70 : canTap ? 140 : 70)
+                  : 140)) +
+                  media.padding.bottom / 2,
+              padding: EdgeInsets.only(
+                  top: 12,
+                  right: 20,
+                  left: 10,
+                  bottom: media.padding.bottom / 2),
+              decoration: new BoxDecoration(
+                color: theme.primaryColor,
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(20)),
+                boxShadow: [
+                  if (canTap) ...{
+                    BoxShadow(
+                        color: Color(0x51000000),
+                        offset: Offset(0, 8),
+                        blurRadius: 16,
+                        spreadRadius: 0),
+                    BoxShadow(
+                        color: Color(0x0a000000),
+                        offset: Offset(0, 2),
+                        blurRadius: 4,
+                        spreadRadius: 0)
+                  }
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  if (canTap && booking.selectedDate == null)
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                      child: InkWell(
+                        onTap: showAdvisorView,
+                        child: Hero(
+                          tag: booking.selectedAdvisor.name,
+                          child: Material(
+                            color: theme.secondaryHeaderColor,
+                            borderRadius: BorderRadius.circular(25),
+                            child: Container(
+                              height: 50,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 15),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Image.asset(booking.selectedAdvisor.asset),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 3),
+                                    child: Text(booking.selectedAdvisor.name,
+                                        style: TextStyle(
+                                          color: Color(0xffffffff),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          letterSpacing: 0,
+                                        )),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: canTap ? showCartView : null,
+                          onVerticalDragUpdate: (drag) =>
+                          canTap ? showCartView : null,
+                          onHorizontalDragUpdate: (drag) =>
+                          canTap ? showCartView : null,
+                          child: Material(
+                            child: Row(
+                              children: <Widget>[
+                                IconButton(
+                                  onPressed: null,
+                                  icon: Icon(
+                                    FeatherIcons.shoppingBag,
+                                    color: theme.accentColor,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: Text(
+                                      "${(booking.addedServiceList == null || int.parse(booking.cartCount) == 0) ? "No" : booking.cartCount} services added",
+                                      style: TextStyle(
+                                        color: Color(0xffffffff),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        fontStyle: FontStyle.normal,
+                                        letterSpacing: 0,
+                                      )),
+                                ),
+                                if (tabIndex == 0) ...{
+                                  SizedBox(width: 20),
+                                  Text(booking.cartTotal,
+                                      style: TextStyle(
+                                        color: Color(0xfffafafa),
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        fontStyle: FontStyle.normal,
+                                        letterSpacing: -0.01666666629413763,
+                                      ))
+                                } else ...{
+                                  Container(
+                                      width: 42,
+                                      height: 42,
+                                      padding: EdgeInsets.all(10),
+                                      margin:
+                                      EdgeInsets.symmetric(horizontal: 10),
+                                      child: Image.asset(
+                                        'assets/icons/arrow_right.png',
+                                        color: theme.accentColor,
+                                      )),
+                                  Expanded(
+                                    child: Text(booking.cartTotal,
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          color: Color(0xfffafafa),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w700,
+                                          fontStyle: FontStyle.normal,
+                                          letterSpacing: -0.01666666629413763,
+                                        )),
+                                  )
+                                }
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (tabIndex == 0)
+                        Material(
+                          type: MaterialType.circle,
+                          color: (booking.selectedAdvisor == null ||
+                              booking.selectedTransportType == null ||
+                              booking.selectedDate == null ||
+                              booking.selectedTimeSlot == null)
+                              ? Color(0xff4e515a)
+                              : theme.accentColor,
+                          elevation: (booking.selectedAdvisor == null ||
+                              booking.selectedTransportType == null ||
+                              booking.selectedDate == null ||
+                              booking.selectedTimeSlot == null)
+                              ? 0
+                              : 7,
+                          child: InkWell(
+                            onTap: (booking.selectedAdvisor == null ||
+                                booking.selectedTransportType == null ||
+                                booking.selectedDate == null ||
+                                booking.selectedTimeSlot == null)
+                                ? null
+                                : () {
+                              if (booking.canVibrate)
+                                Vibrate.feedback(FeedbackType.light);
+                              tabController.animateTo(1,
+                                  duration: duration,
+                                  curve: Curves.easeOut);
+                            },
+                            customBorder: CircleBorder(),
+                            child: Container(
+                                width: 42,
+                                height: 42,
+                                padding: EdgeInsets.all(10),
+                                child: Image.asset(
+                                  'assets/icons/arrow_right.png',
+                                  color: (booking.selectedAdvisor == null ||
+                                      booking.selectedTransportType ==
+                                          null ||
+                                      booking.selectedDate == null ||
+                                      booking.selectedTimeSlot == null)
+                                      ? Colors.white24
+                                      : null,
+                                )),
+                          ),
+                        )
+                    ],
+                  ),
+                  if (!hasFocus && tabIndex != 0)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Material(
+                        color: Color(0xff00e1c2),
+                        borderRadius: BorderRadius.circular(32),
+                        child: InkWell(
+                          onTap: () {
+                            if (booking.canVibrate)
+                              Vibrate.feedback(FeedbackType.light);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => FifthPage(),
+                                    fullscreenDialog: true));
+                          },
+                          borderRadius: BorderRadius.circular(32),
+                          child: Container(
+                            height: 55,
+                            width: 308,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Text("Schedule Appointment",
+                                    style: TextStyle(
+                                      color: Color(0xff2f313b),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      fontStyle: FontStyle.normal,
+                                      letterSpacing: 0,
+                                    )),
+                                Text(
+                                    "${DateFormat("EEE, MMM dd").format(booking.selectedDate)}  " +
+                                        booking.selectedTimeSlot,
+                                    style: TextStyle(
+                                      color: Color(0xff3a405a),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      fontStyle: FontStyle.normal,
+                                      letterSpacing: 0,
+                                    ))
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                ],
+              ),
+            ),
+          ],
+        ),),
+      );
+    else
+      return SizedBox();
+  }
+
+  showCartView() async {
+    var media = MediaQuery.of(context);
+    Size size = media.size;
+    double getTopPadding() =>
+        (100 -
+            ((((appBar.preferredSize.height + media.padding.top) -
+                        appBar.bottom.preferredSize.height +
+                        10) /
+                    size.height) *
+                100)) /
+        100;
+    BookingProvider booking =
+        Provider.of<BookingProvider>(context, listen: false);
+    if (booking.canVibrate) await Vibrate.feedback(FeedbackType.light);
+    await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: Material(
+                child: Stack(
+                  children: <Widget>[
+                    DraggableScrollableSheet(
+                        initialChildSize: 0.65,
+                        minChildSize: 0.5,
+                        maxChildSize: getTopPadding(),
+                        builder: (context, controller) {
+                          return CartPage(
+                            scrollController: controller,
+                            onClosed: () {
+                              Navigator.of(context).pop();
+                            },
+                          );
+                        }),
+                    bottomBar(false)
+                  ],
+                ),
+              ),
+            ));
+  }
+
+  showAdvisorView() async {
+    var media = MediaQuery.of(context);
+    Size size = media.size;
+    double getTopPadding() =>
+        (100 -
+            ((((appBar.preferredSize.height + media.padding.top) -
+                        appBar.bottom.preferredSize.height +
+                        10) /
+                    size.height) *
+                100)) /
+        100;
+    BookingProvider booking =
+        Provider.of<BookingProvider>(context, listen: false);
+    if (booking.canVibrate) await Vibrate.feedback(FeedbackType.light);
+    await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: DraggableScrollableSheet(
+                  initialChildSize: 0.65,
+                  minChildSize: 0.5,
+                  maxChildSize: getTopPadding(),
+                  builder: (context, controller) {
+                    return AdvisorsPage(
+                      scrollController: controller,
+                      onClosed: () {
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  }),
+            ));
+  }
+
   Future<bool> onBackPressed(BookingProvider booking) {
     if (hasFocus) {
       removeFocus();
-      return Future.value(false);
-    } else if (showCartView) {
-      setState(() {
-        showCartView = false;
-      });
       return Future.value(false);
     } else if (_appBarAnimationController.value != 0) {
       _appBarAnimationController.reverse();
@@ -2067,14 +1944,12 @@ class _FourthPageState extends State<FourthPage> with TickerProviderStateMixin {
     } else if (tabIndex != 0) {
       tabController.animateTo(0, duration: duration, curve: Curves.easeIn);
       return Future.value(false);
-    } else if (mainPage != 0) {
-      print('Print Page: $mainPage');
-      setState(() {
-        mainPage = 0;
-      });
+    } else if (booking.selectedTransportType != null) {
+      booking.setDefaultAdvisor();
+      booking.setTransportType(null);
       return Future.value(false);
     } else {
-      booking.setAdvisor(null);
+      booking.setDefaultAdvisor();
       booking.setTransportType(null);
       booking.setDate(null);
       booking.setTimeSlot(null);

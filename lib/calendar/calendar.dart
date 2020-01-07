@@ -4,7 +4,9 @@ import 'package:date_utils/date_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:service_appointment/calendar/calendar_tile.dart';
+import 'package:service_appointment/provider/booking_provider.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vibrate/vibrate.dart';
 
@@ -161,6 +163,8 @@ class _CalendarState extends State<Calendar> {
     bool monthStarted = false;
     bool monthEnded = false;
 
+    BookingProvider bookingProvider = Provider.of(context, listen: false);
+
     calendarDays.forEach(
       (day) {
         if (monthStarted && day.day == 01) {
@@ -185,7 +189,8 @@ class _CalendarState extends State<Calendar> {
               onDateSelected: () => handleSelectedDateAndUserCallback(day),
               date: day,
               dateStyles: configureDateStyle(monthStarted, monthEnded),
-              isSelected: Utils.isSameDay(selectedDate, day),
+              isSelected: bookingProvider.selectedDate != null &&
+                  Utils.isSameDay(bookingProvider.selectedDate, day),
             ),
           );
         }
@@ -494,7 +499,7 @@ class ExpansionCrossFade extends StatelessWidget {
         sizeCurve: Curves.decelerate,
         crossFadeState:
             isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-        duration: const Duration(milliseconds: 1000),
+        duration: const Duration(milliseconds: 800),
       ),
     );
   }

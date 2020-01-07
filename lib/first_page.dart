@@ -14,8 +14,10 @@ class FirstPage extends StatefulWidget {
   _FirstPageState createState() => _FirstPageState();
 }
 
-class _FirstPageState extends State<FirstPage> with AfterLayoutMixin<FirstPage> {
+class _FirstPageState extends State<FirstPage>
+    with AfterLayoutMixin<FirstPage> {
   FocusNode focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +28,8 @@ class _FirstPageState extends State<FirstPage> with AfterLayoutMixin<FirstPage> 
 
   @override
   void afterFirstLayout(BuildContext context) {
-    BookingProvider booking = Provider.of<BookingProvider>(context, listen: false);
+    BookingProvider booking =
+        Provider.of<BookingProvider>(context, listen: false);
     booking.firstTextController.addListener(() {
       setState(() {});
     });
@@ -39,7 +42,7 @@ class _FirstPageState extends State<FirstPage> with AfterLayoutMixin<FirstPage> 
     BookingProvider booking = Provider.of<BookingProvider>(context);
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Row(
           children: <Widget>[
@@ -81,14 +84,15 @@ class _FirstPageState extends State<FirstPage> with AfterLayoutMixin<FirstPage> 
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
-            Positioned(
-                bottom: 30,
-                right: 0,
-                left: 0,
-                child: Image.asset(
-                  'assets/images/footer.png',
-                  height: 30,
-                )),
+            if (!focusNode.hasFocus)
+              Positioned(
+                  bottom: 30,
+                  right: 0,
+                  left: 0,
+                  child: Image.asset(
+                    'assets/images/footer.png',
+                    height: 30,
+                  )),
             SingleChildScrollView(
               padding: EdgeInsets.all(20),
               child: Column(
@@ -127,7 +131,7 @@ class _FirstPageState extends State<FirstPage> with AfterLayoutMixin<FirstPage> 
                               fontWeight: FontWeight.w500),
                           focusNode: focusNode,
                           controller: booking.firstTextController,
-                          onTap: (){
+                          onTap: () {
                             if (booking.canVibrate)
                               Vibrate.feedback(FeedbackType.light);
                           },
@@ -168,7 +172,8 @@ class _FirstPageState extends State<FirstPage> with AfterLayoutMixin<FirstPage> 
                                   child: Text(
                                     'Start',
                                     style: textTheme.title.copyWith(
-                                        color: booking.firstTextController.text.isEmpty
+                                        color: booking.firstTextController.text
+                                                .isEmpty
                                             ? Colors.white
                                             : theme.primaryColor,
                                         fontWeight: FontWeight.w700),
@@ -177,8 +182,8 @@ class _FirstPageState extends State<FirstPage> with AfterLayoutMixin<FirstPage> 
                             onPressed: booking.firstTextController.text.isEmpty
                                 ? null
                                 : () {
-                              if (booking.canVibrate)
-                                Vibrate.feedback(FeedbackType.light);
+                                    if (booking.canVibrate)
+                                      Vibrate.feedback(FeedbackType.light);
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -199,5 +204,4 @@ class _FirstPageState extends State<FirstPage> with AfterLayoutMixin<FirstPage> 
       ),
     );
   }
-
 }
